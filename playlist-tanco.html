@@ -30,6 +30,7 @@ h1{display:none}
 <div class="player">
 <div id="yt"></div>
 </div>
+<p id="msg"></p>
 <script>
 var LIST="PLMYt4jaQ3Z0ctCeisPzU83QM9yYaQ5u47",player,total=0,started=false,skips=0;
 function pick(){
@@ -51,7 +52,8 @@ function onYouTubeIframeAPIReady(){
     },250);
    },
    onStateChange:function(e){if(e.data===1){started=true;skips=0}},
-   onError:function(){
+   onError:function(e){
+    document.getElementById("msg").textContent="Mã lỗi: "+e.data+" | bài "+(player.getPlaylistIndex()+1)+"/"+total+" | thử lần "+skips;
     if(++skips>20)return;
     if(started){try{player.nextVideo()}catch(e){}}
     else if(total){setTimeout(pick,400)}
