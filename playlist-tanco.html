@@ -31,23 +31,32 @@ h1{display:none}
 <div id="yt"></div>
 </div>
 <script>
-var LIST="PLMYt4jaQ3Z0ctCeisPzU83QM9yYaQ5u47",player;
+var LIST="PLMYt4jaQ3Z0ctCeisPzU83QM9yYaQ5u47",player,total=0,started=false,skips=0;
+function pick(){
+ var i=Math.floor(Math.random()*total);
+ player.cuePlaylist({listType:"playlist",list:LIST,index:i});
+ setTimeout(function(){try{player.setShuffle(true)}catch(e){}},800);
+}
 function onYouTubeIframeAPIReady(){
  player=new YT.Player("yt",{
   host:"https://www.youtube-nocookie.com",
   width:"100%",height:"100%",
   playerVars:{listType:"playlist",list:LIST,rel:0,modestbranding:1,playsinline:1},
-  events:{onReady:function(){
-   var tries=0,t=setInterval(function(){
-    var l=player.getPlaylist&&player.getPlaylist();
-    if(l&&l.length){
-     clearInterval(t);
-     var i=Math.floor(Math.random()*l.length);
-     player.cuePlaylist({listType:"playlist",list:LIST,index:i});
-     setTimeout(function(){try{player.setShuffle(true)}catch(e){}},800);
-    }else if(++tries>40){clearInterval(t)}
-   },250);
-  }}
+  events:{
+   onReady:function(){
+    var tries=0,t=setInterval(function(){
+     var l=player.getPlaylist&&player.getPlaylist();
+     if(l&&l.length){clearInterval(t);total=l.length;pick()}
+     else if(++tries>40){clearInterval(t)}
+    },250);
+   },
+   onStateChange:function(e){if(e.data===1){started=true;skips=0}},
+   onError:function(){
+    if(++skips>20)return;
+    if(started){try{player.nextVideo()}catch(e){}}
+    else if(total){setTimeout(pick,400)}
+   }
+  }
  });
 }
 </script>
